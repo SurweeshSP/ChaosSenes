@@ -106,35 +106,52 @@ This is 100% **backend + data + ML + AWS**.
 ```bash
 chaossense/
 ├─ README.md
-├─ requirements.txt
+├─ requirements.txt              # Python deps for local + Lambda code
 ├─ config/
-│  └─ config.example.yaml
-├─ collectors/
-│  ├─ cpu_ram_network_agent.py
-│  └─ utils_system_metrics.py
-├─ streaming/
-│  ├─ kinesis_producer/producer.py
-│  └─ kinesis_consumer/consumer.py
-├─ data_lake/
-│  ├─ schemas/chaos_event_schema.json
-│  └─ examples/sample_events.json
-├─ batch/
-│  ├─ glue_jobs/chaos_feature_etl.py
-│  └─ notebooks/chaos_exploration.ipynb
+│  ├─ config.example.yaml        # Sample config for streams, regions, etc.
+│  └─ logging.conf               # Optional logging configuration
+├─ collectors/                   # Local/system agents that collect chaos signals
+│  ├─ cpu_ram_network_agent.py   # Collect CPU, RAM, ping jitter & send to Kinesis
+│  └─ utils_system_metrics.py    # Helper funcs (psutil, ping, etc.)
+├─ streaming/                    # Real-time data pipeline components
+│  ├─ kinesis_producer/          # Simple producer logic (if separate from collector)
+│  │  └─ producer.py
+│  └─ kinesis_consumer/          # For local debugging / testing consumers
+│     └─ consumer.py
+├─ data_lake/                    # S3-related logic and schemas
+│  ├─ schemas/
+│  │  └─ chaos_event_schema.json # JSON schema for each event
+│  └─ examples/
+│     └─ sample_events.json      # Example of raw events
+├─ batch/                        # Batch/ETL jobs
+│  ├─ glue_jobs/
+│  │  └─ chaos_feature_etl.py    # Glue-style ETL script (can run locally first)
+│  └─ notebooks/
+│     └─ chaos_exploration.ipynb # Jupyter: entropy, plots, first analysis
 ├─ ml/
-│  ├─ feature_engineering/chaos_features.py
-│  ├─ models/forecasting.py
-│  └─ experiments/chaos_signatures.ipynb
+│  ├─ feature_engineering/
+│  │  └─ chaos_features.py       # Functions to compute entropy, etc.
+│  ├─ models/
+│  │  ├─ forecasting.py          # Simple LSTM / baseline forecasting
+│  │  └─ anomaly_detection.py    # IsolationForest / RandomCutForest (offline first)
+│  └─ experiments/
+│     └─ chaos_signatures.ipynb  # Notebooks for experimenting
 ├─ api/
-│  ├─ lambda/chaos_forecast_handler.py
-│  └─ openapi/chaosense_api.yaml
-├─ infra/
-│  ├─ terraform/main.tf
-│  └─ diagrams/architecture.png
+│  ├─ lambda/
+│  │  ├─ chaos_forecast_handler.py   # Lambda entrypoint for /chaos/forecast
+│  │  └─ chaos_insights_handler.py   # Lambda entrypoint for /chaos/insights
+│  └─ openapi/
+│     └─ chaosense_api.yaml      # Optional: API spec for API Gateway
+├─ infra/                        # AWS infrastructure as code (add gradually)
+│  ├─ terraform/                 # OR use cdk/ if you prefer CDK
+│  │  └─ main.tf                 # Define Kinesis, S3, IAM, Lambda later
+│  └─ diagrams/
+│     └─ architecture.png        # Exported architecture diagram (optional)
 ├─ scripts/
-│  ├─ setup_venv.sh
-│  └─ local_run_demo.sh
+│  ├─ setup_venv.sh              # Shell script to create venv and install deps
+│  └─ local_run_demo.sh          # Run collector locally & write to file or stdout
 └─ docs/
-   ├─ architecture.md
-   ├─ milestones.md
-   └─ chaos_metrics.md
+   ├─ architecture.md            # High-level description of architecture
+   ├─ milestones.md              # Roadmap v1, v2, v3
+   └─ chaos_metrics.md           # Notes on entropy, Lyapunov, etc.
+
